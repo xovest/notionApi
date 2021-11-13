@@ -1,11 +1,13 @@
 require('dotenv').config();
 const express = require('express');
-const { getTags, createSuggestion, getSuggs } = require('./notion');
+const { getTags, createSuggestion, getSuggs, upVoteSugg } = require('./notion');
 
 const app = express();
 app.set('views', './views');
 app.set('view engine', 'ejs');
+app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 let tags = [];
 getTags().then(data => {
@@ -34,6 +36,11 @@ app.post('/create-suggestion', async (req, res) => {
   });
 
   res.redirect('/');
+});
+
+app.post('/up-vote-suggestion', async (req, res) => {
+  const votes = await upVoteSugg(req.body.suggestionId);
+  res.json({ votes });
 });
 
 app.listen(process.env.PORT)

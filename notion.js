@@ -87,8 +87,26 @@ function fromNotionObject(notionpage) {
   };
 }
 
+async function upVoteSugg(pageId) {
+  const sugg = await getSugg(pageId);
+  const votes = sugg.votes + 1;
+  await notion.pages.update({
+    page_id: pageId,
+    properties: {
+      [process.env.NOTION_VOTES_ID]: { number: votes }
+    }
+  });
+
+  return votes;
+}
+
+async function getSugg(pageId) {
+  return fromNotionObject(await notion.pages.retrieve({ page_id: pageId }));
+}
+
 module.exports = {
   createSuggestion,
   getTags,
-  getSuggs
+  getSuggs,
+  upVoteSugg
 };
