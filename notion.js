@@ -58,17 +58,37 @@ function createSuggestion({ title, description, isProject, tags }) {
   });
 }
 
-getTags().then(tags => {
-  createSuggestion({
-    title: 'Thiss',
-    description: 'ia ceva la this',
-    isProject: true,
-    votes: 3,
-    tags: tags
+async function getSuggs() {
+  const notionPages = await notion.databases.query({
+    database_id: process.env.NOTION_DATABASE_ID,
+    sorts: [
+      { 
+        property: process.env.NOTION_VOTES_ID,
+        direction: 'descending'
+      }
+    ]
   });
-});
+
+  return notionPages.results.map(fromNotionObject);
+}
+
+function fromNotionObject(notionpage) {
+  const propsById = notionPropsById(notionpage.properties);
+
+  return {
+    id: notionpage.id,
+    title: propsById[process.env.NOTION_TITLE_ID].title[0].plain_text,
+    votes: propsById[process.env.NOTION_VOTES_ID].number,
+    tags: propsById[process.env.NOTION_TAGS_ID].multi_select.map(option => {
+      return { id: option.id, name: option.name };
+    }),
+    isProject: propsById[process.env.NOTION_PROJECT_ID].checkbox,
+    description: propsById[process.env.NOTION_DESCRIPTION_ID].rich_text[0].text.content
+  };
+}
 
 module.exports = {
   createSuggestion,
-  getTags
+  getTags,
+  getSuggs
 };

@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const { getTags, createSuggestion } = require('./notion');
+const { getTags, createSuggestion, getSuggs } = require('./notion');
 
 const app = express();
 app.set('views', './views');
@@ -16,8 +16,9 @@ setInterval(async () => {
   tags = await getTags();
 }, 1000 * 60 * 60);
 
-app.get('/', (req, res) => {
-  res.render('index', { tags });
+app.get('/', async (req, res) => {
+  const suggs = await getSuggs();
+  res.render('index', { tags, suggs });
 });
 
 app.post('/create-suggestion', async (req, res) => {
