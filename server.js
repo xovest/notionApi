@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const notion = require('./notion');
 
 const app = express();
 
